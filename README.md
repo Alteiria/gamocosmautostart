@@ -5,7 +5,7 @@ This project starts a fake Minecraft server that wait for a player to join it th
 ## Alteiria is looking for Java developers
 Alteiria is a MMORPG server that breaks Minecraft’s boundaries to offer its players innovative and captivating content, without launcher. You may visit our website to learn more about us: https://alteiria.fr/index.en.html.
 
-We are seeking for Java developers, if you are interested into joining the project please consider applying here: https://goo.gl/forms/MSVczguQJkso05T83.
+We are seeking for Java developers, if you are interested into joining the project please consider applying here: https://forms.gle/4L3esqh72VzLfcix9.
 
 Internally we use GamocosmAutoStart to manage some of our servers :smiley:.
 
