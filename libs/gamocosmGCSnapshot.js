@@ -3,16 +3,16 @@ import CookieJar from "tough-cookie";
 import cheerio from "cheerio";
 import { getSnapshots, deleteSnapshot } from "./digitaloceanAPI.js";
 
-const cookieJar = new CookieJar.CookieJar();
-
-const instance = got.extend({
-    prefixUrl: "https://gamocosm.com",
-    resolveBodyOnly: true,
-    cookieJar
-});
-
 const login = function (username, password) {
     return new Promise((resolve, reject) => {
+        const cookieJar = new CookieJar.CookieJar();
+
+        const instance = got.extend({
+            prefixUrl: "https://gamocosm.com",
+            resolveBodyOnly: true,
+            cookieJar
+        });
+
         instance("users/sign_in").then(body => {
             const loadHTMLBody = cheerio.load(body);
             const authenticity_token = loadHTMLBody("#new_user > input:nth-child(2)").val();
@@ -27,7 +27,7 @@ const login = function (username, password) {
                 },
                 followRedirect: false
             }).then(() => {
-                resolve();
+                resolve(instance);
             });
         });
     });
@@ -35,7 +35,7 @@ const login = function (username, password) {
 
 function getSnapshotSavedID(username, password, serverID) {
     return new Promise((resolve, reject) => {
-        login(username, password).then(() => {
+        login(username, password).then((instance) => {
             instance("servers/" + serverID).then((body) => {
                 const loadHTMLBody = cheerio.load(body);
                 const savedSnapshotID = loadHTMLBody("#server_remote_snapshot_id").val();
@@ -43,28 +43,29 @@ function getSnapshotSavedID(username, password, serverID) {
                     resolve(savedSnapshotID);
                 }
                 else {
-                    throw("The saved snapshot ID is not the correct size. Abording...")
+                    throw ("The saved snapshot ID is not the correct size. Abording...")
                 }
             });
         });
     });
 }
 
-export default function(digitaloceanAPIToken, gamocosmUsername, gamocosmPassword, gamocosmServerName, gamocosmServerID) {
+export default function (digitaloceanAPIToken, gamocosmUsername, gamocosmPassword, gamocosmServerName, gamocosmServerID) {
     getSnapshots(digitaloceanAPIToken).then(result => {
-        const snapshotList = result.snapshots;
+        let snapshotList = result.snapshots;
         try {
             getSnapshotSavedID(gamocosmUsername, gamocosmPassword, gamocosmServerID)
-            .then(savedSnapshotID => {
-                const snapshotListFiltered = snapshotList
-                    .filter(snapshot => snapshot.name.includes(gamocosmServerName))
-                    .filter(snapshot => snapshot.id != savedSnapshotID);
-                if (snapshotListFiltered.length > 0 && snapshotList.length > 1) {
-                    snapshotListFiltered.forEach(snapshot => {
-                        deleteSnapshot(digitaloceanAPIToken, snapshot.id);
-                    });
-                }
-            });
+                .then(savedSnapshotID => {
+                    snapshotList = snapshotList
+                        .filter(snapshot => snapshot.name.includes(gamocosmServerName));
+                    if (snapshotList.length > 1) {
+                        snapshotList = snapshotList
+                            .filter(snapshot => snapshot.id != savedSnapshotID);
+                        snapshotList.forEach(snapshot => {
+                            deleteSnapshot(digitaloceanAPIToken, snapshot.id);
+                        });
+                    }
+                });
         } catch (error) {
             console.log(error);
         }
