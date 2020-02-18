@@ -48,8 +48,8 @@ function checkUntilServerDown(serverData, proxyToNewDO) {
 export default function (serverData) {
 
     const mcServer = mc.createServer({
-        "online-mode": true,
-        encryption: true,
+        "online-mode": serverData.online-mode,
+        encryption: serverData.online-mode,
         host: "0.0.0.0",
         port: serverData.port,
         beforePing: function (res, client) {

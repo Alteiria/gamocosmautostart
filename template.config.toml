@@ -8,3 +8,4 @@ name = "example"
 id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx"
 key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 port = 25565
+online-mode = true
