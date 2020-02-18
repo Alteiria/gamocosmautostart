@@ -59,7 +59,7 @@ export default function(digitaloceanAPIToken, gamocosmUsername, gamocosmPassword
                 const snapshotListFiltered = snapshotList
                     .filter(snapshot => snapshot.name.includes(gamocosmServerName))
                     .filter(snapshot => snapshot.id != savedSnapshotID);
-                if (snapshotListFiltered.length > 0 && snapshotList > 1) {
+                if (snapshotListFiltered.length > 0 && snapshotList.length > 1) {
                     snapshotListFiltered.forEach(snapshot => {
                         deleteSnapshot(digitaloceanAPIToken, snapshot.id);
                     });
