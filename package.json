@@ -1,6 +1,6 @@
 {
   "name": "gamocosmautostart",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A Minecraft skeleton server that wait for a player to join then start the real server on gamocosm.",
   "main": "index.js",
   "scripts": {

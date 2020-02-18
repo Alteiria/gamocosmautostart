@@ -1,10 +1,10 @@
 [secrets]
 digitaloceanAPIKey = "apikey"
-gamocosmUsername = "contact@example.org"
-gamocosmPassword = "PaSsWoRd"
+gamocosmUsername = ""
+gamocosmPassword = ""
 
 [servers.example]
 name = "example"
 id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx"
 key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-port = 25000
+port = 25565

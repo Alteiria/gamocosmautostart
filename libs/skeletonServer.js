@@ -57,7 +57,8 @@ export default function (serverData) {
         beforePing: function (res, client) {
             res.version.name = "The server is offline!";
             res.version.protocol = 0;
-            res.description.text = "§cThe Minecraft server " + serverData.name + " is offline!\n§6If you want to launch it please join it.";
+            res.description.text = "§cThe Minecraft server " + serverData.name
+                + " is offline!\n§6If you want to launch it please join it.";
         },
         maxPlayers: 0
     });
@@ -75,7 +76,8 @@ export default function (serverData) {
                 checkUntilServerUp(serverData, mcServer);
             }
             const reasonKick = {
-                text: "Hello §b" + client.username + "§r!\n§cThe Minecraft server " + serverData.name + " is not ready yet!\n§rPlease come back in a few seconds..."
+                text: "Hello §b" + client.username + "§r!\n§cThe Minecraft server "
+                    + serverData.name + " is not ready yet!\n§rPlease come back in less than a minute."
             };
             client.write("kick_disconnect", { reason: JSON.stringify(reasonKick) });
         });
