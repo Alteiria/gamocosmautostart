@@ -5,7 +5,6 @@ import launchSkeletonServer from "./skeletonServer.js";
 
 function checkIfServerUp(serverData, mcServer) {
     getStatus(serverData.id, serverData.key).then(result => {
-        console.log(result);
         if (result.server && result.minecraft && result.ip && result.status == null) {
             mcServer.close();
             const proxyToNewDO = proxyTCP.createProxy(serverData.port, result.ip, 25565);
@@ -37,7 +36,6 @@ function checkUntilServerUp(serverData, mcServer) {
 function checkUntilServerDown(serverData, proxyToNewDO) {
     const checkIfServerDown = setInterval(() => {
         getStatus(serverData.id, serverData.key).then(result => {
-            console.log(result);
             if (!result.server && !result.minecraft && result.ip == null && result.status == null) {
                 proxyToNewDO.end();
                 clearInterval(checkIfServerDown);
@@ -66,12 +64,9 @@ export default function (serverData) {
     checkIfServerUp(serverData, mcServer);
 
     mcServer.on("login", function (client) {
-        console.log("someone joined");
-
         getStatus(serverData.id, serverData.key).then(result => {
-            console.log(result);
             if (!result.server && !result.minecraft && result.ip == null && result.status == null) {
-                console.log("starting the server!");
+                console.log("starting the server " + serverData.name + " because someone joined it!");
                 startServer(serverData.id, serverData.key);
                 checkUntilServerUp(serverData, mcServer);
             }

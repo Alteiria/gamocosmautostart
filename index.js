@@ -6,6 +6,7 @@ import launchGCSnapshot from "./libs/gamocosmGCSnapshot.js"
 const configFile = loadTOMLConfig("./config.toml");
 
 Object.keys(configFile.servers).forEach(serverName => {
+    console.log("Loading the server " + serverName);
     const serverData = configFile.servers[serverName];
     launchSkeletonServer(serverData);
     setInterval(() => { // checkIfServerBrokenState
