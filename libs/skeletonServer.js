@@ -7,8 +7,10 @@ function checkIfServerUp(serverData, mcServer) {
     getStatus(serverData.id, serverData.key).then(result => {
         if (result.server && result.minecraft && result.ip && result.status == null) {
             mcServer.close();
-            const proxyToNewDO = proxyTCP.createProxy(serverData.port, result.ip, 25565);
-            checkUntilServerDown(serverData, proxyToNewDO);
+            mcServer.on('close', () => {
+                const proxyToNewDO = proxyTCP.createProxy(serverData.port, result.ip, 25565);
+                checkUntilServerDown(serverData, proxyToNewDO);
+            });
         }
         else if (result.server && !result.minecraft && result.ip && result.status == null) {
             resumeServer(serverData.id, serverData.key);
@@ -22,9 +24,11 @@ function checkUntilServerUp(serverData, mcServer) {
         getStatus(serverData.id, serverData.key).then(result => {
             if (result.server && result.minecraft && result.ip && result.status == null) {
                 mcServer.close();
-                const proxyToNewDO = proxyTCP.createProxy(serverData.port, result.ip, 25565);
-                checkUntilServerDown(serverData, proxyToNewDO);
-                clearInterval(checkIfServerUp);
+                mcServer.on('close', () => {
+                    const proxyToNewDO = proxyTCP.createProxy(serverData.port, result.ip, 25565);
+                    checkUntilServerDown(serverData, proxyToNewDO);
+                    clearInterval(checkIfServerUp);
+                });
             }
             else if (result.server && !result.minecraft && result.ip && result.status == null) {
                 resumeServer(serverData.id, serverData.key);
