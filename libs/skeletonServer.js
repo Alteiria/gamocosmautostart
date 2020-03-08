@@ -1,56 +1,57 @@
 import { startServer, getStatus, resumeServer } from "./gamocosmWrapper.js";
 import mc from "minecraft-protocol";
 import proxyTCP from "node-tcp-proxy";
-import launchSkeletonServer from "./skeletonServer.js";
 
-function checkIfServerUp(serverData, mcServer) {
-    getStatus(serverData.id, serverData.key).then(result => {
-        if (result.server && result.minecraft && result.ip && result.status == null) {
-            mcServer.close();
-            mcServer.on('close', () => {
-                const proxyToNewDO = proxyTCP.createProxy(serverData.port, result.ip, 25565);
-                checkUntilServerDown(serverData, proxyToNewDO);
-            });
-        }
-        else if (result.server && !result.minecraft && result.ip && result.status == null) {
-            resumeServer(serverData.id, serverData.key);
-            checkUntilServerUp(serverData, mcServer);
-        }
+function getServerStatus(serverData) {
+    return new Promise((resolve, reject) => {
+        getStatus(serverData.id, serverData.key).then(result => {
+            if (result.server && result.minecraft && result.ip && result.status == null)
+                result.status = "up";
+            else if (result.server && !result.minecraft && result.ip && result.status == null)
+                result.status = "paused";
+            else if (!result.server && result.status == null && !result.minecraft && result.ip == null)
+                result.status = "down";
+            else if (!result.server && !result.minecraft && result.ip != null && result.status == null)
+                result.status = "broken";
+            resolve(result);
+        });
     });
 }
 
-function checkUntilServerUp(serverData, mcServer) {
-    const checkIfServerUp = setInterval(() => {
-        getStatus(serverData.id, serverData.key).then(result => {
-            if (result.server && result.minecraft && result.ip && result.status == null) {
-                mcServer.close();
-                mcServer.on('close', () => {
-                    const proxyToNewDO = proxyTCP.createProxy(serverData.port, result.ip, 25565);
-                    checkUntilServerDown(serverData, proxyToNewDO);
-                    clearInterval(checkIfServerUp);
-                });
-            }
-            else if (result.server && !result.minecraft && result.ip && result.status == null) {
-                resumeServer(serverData.id, serverData.key);
-            }
-        });
+function checkUntilServerIsUp(serverData, mcServer) {
+    const loopUntilServerIsUp = setInterval(() => {
+        getServerStatus(serverData)
+            .then(result => {
+                switch (result.status) {
+                    case "up":
+                        mcServer.close();
+                        mcServer.on('close', () => {
+                            const proxyToNewDO = proxyTCP.createProxy(serverData.port, result.ip, 25565);
+                            checkUntilServerIsDown(serverData, proxyToNewDO);
+                            clearInterval(loopUntilServerIsUp);
+                        });
+                    case "paused":
+                        resumeServer(serverData.id, serverData.key);
+                }
+            });
     }, 5000);
 }
 
-function checkUntilServerDown(serverData, proxyToNewDO) {
-    const checkIfServerDown = setInterval(() => {
-        getStatus(serverData.id, serverData.key).then(result => {
-            if (!result.server && !result.minecraft && result.ip == null && result.status == null) {
-                proxyToNewDO.end();
-                clearInterval(checkIfServerDown);
-                launchSkeletonServer(serverData);
-            }
-        });
+function checkUntilServerIsDown(serverData, proxyToNewDO) {
+    const loopUntilServerIsDown = setInterval(() => {
+        getServerStatus(serverData)
+            .then(result => {
+                if (result.status == "down") {
+                    if (proxyToNewDO)
+                        proxyToNewDO.end();
+                    clearInterval(loopUntilServerIsDown);
+                    launchSkeletonServer(serverData);
+                }
+            });
     }, 5000);
 }
 
-export default function (serverData) {
-
+function launchSkeletonServer(serverData) {
     const mcServer = mc.createServer({
         "online-mode": serverData.onlinemode,
         encryption: serverData.onlinemode,
@@ -65,20 +66,52 @@ export default function (serverData) {
         maxPlayers: 0
     });
 
-    checkIfServerUp(serverData, mcServer);
-
     mcServer.on("login", function (client) {
-        getStatus(serverData.id, serverData.key).then(result => {
-            if (!result.server && !result.minecraft && result.ip == null && result.status == null) {
-                console.log("starting the server " + serverData.name + " because someone joined it!");
-                startServer(serverData.id, serverData.key);
-                checkUntilServerUp(serverData, mcServer);
-            }
-            const reasonKick = {
-                text: "Hello §b" + client.username + "§r!\n§cThe Minecraft server "
-                    + serverData.name + " is not ready yet!\n§rPlease come back in less than a minute."
-            };
-            client.write("kick_disconnect", { reason: JSON.stringify(reasonKick) });
-        });
+        let isServerNeededToStart = true;
+        getServerStatus(serverData)
+            .then(result => {
+                switch (result.status) {
+                    case "down":
+                        if (isServerNeededToStart) {
+                            isServerNeededToStart = false;
+                            console.log("starting the server " + serverData.name + " because someone joined it!");
+                            startServer(serverData.id, serverData.key);
+                            checkUntilServerIsUp(serverData, mcServer);
+                        }
+                    case "paused":
+                        resumeServer(serverData.id, serverData.key);
+                        checkUntilServerIsUp(serverData, mcServer)
+                }
+            });
+        const reasonKick = {
+            text: "Hello §b" + client.username + "§r!\n§cThe Minecraft server "
+                + serverData.name + " is not ready yet!\n§rPlease come back in less than a minute."
+        };
+        client.write("kick_disconnect", { reason: JSON.stringify(reasonKick) });
     });
+}
+
+export default function (serverData) {
+    getServerStatus(serverData)
+        .then(result => {
+            switch (result.status) {
+                case "up":
+                    const proxyToNewDO = proxyTCP.createProxy(serverData.port, result.ip, 25565);
+                    checkUntilServerIsDown(serverData, proxyToNewDO);
+                    break;
+                case "starting":
+                case "preparing":
+                case "broken":
+                case "down":
+                    launchSkeletonServer(serverData);
+                    break;
+                case "paused":
+                    resumeServer(serverData.id, serverData.key);
+                    launchSkeletonServer(serverData);
+                    break;
+                case "saving":
+                    checkUntilServerIsDown(serverData);
+                    break;
+            }
+        });
 }
