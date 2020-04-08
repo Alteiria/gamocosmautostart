@@ -18,5 +18,4 @@ Internally we use GamocosmAutoStart to manage some of our servers :smiley:.
 6. Copy the `API key` then paste it in the `config.toml` file for the `key` field under `[servers.yourServerName]`.
 7. In the address URL bar of the Gamocosm interface copy everything **after** `https://gamocosm.com/servers/` then paste it in the `config.toml` file for the `id` field under `[servers.yourServerName]`.
 8. You may change the port in the `config.toml` file (optional).
-9. Enter the DigitalOcean API key that you used when registering on Gamocosm in the `digitaloceanAPIKey` field in the `config.toml` file.
-10. Enter your username and password for the Gamocosm website in the `gamocosmUsername` and `gamocosmPassword` fields in the `config.toml` file. This part is necessary while this bug exists: https://github.com/Gamocosm/Gamocosm/issues/113
+9. That's it. Enjoy!
