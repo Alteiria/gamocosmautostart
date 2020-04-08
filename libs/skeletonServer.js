@@ -59,8 +59,8 @@ function checkUntilServerIsDown(serverData, proxyToNewDO) {
 
 function launchSkeletonServer(serverData) {
     const mcServer = mc.createServer({
-        "online-mode": (serverData.onlinemode || "true"),
-        encryption: (serverData.onlinemode || "true"),
+        "online-mode": serverData.onlinemode,
+        encryption: serverData.onlinemode,
         host: "0.0.0.0",
         port: serverData.port,
         beforePing: function (res, client) {
