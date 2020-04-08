@@ -63,6 +63,7 @@ function launchSkeletonServer(serverData) {
         onlineMode = JSON.parse(serverData.onlinemode.toLowerCase());
     const mcServer = mc.createServer({
         "online-mode": onlineMode,
+        encryption: onlineMode,
         host: "0.0.0.0",
         port: serverData.port,
         beforePing: (res, client) => {
