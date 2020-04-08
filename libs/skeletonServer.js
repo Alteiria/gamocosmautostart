@@ -58,11 +58,7 @@ function checkUntilServerIsDown(serverData, proxyToNewDO) {
 }
 
 function launchSkeletonServer(serverData) {
-    if (serverData.onlinemode == null)
-        serverData.onlinemode = true;
-    const mcServer = mc.createServer({
-        "online-mode": serverData.onlinemode,
-        encryption: serverData.onlinemode,
+    let mcServerOptions = {
         host: "0.0.0.0",
         port: serverData.port,
         beforePing: (res, client) => {
@@ -72,7 +68,15 @@ function launchSkeletonServer(serverData) {
                 + " is offline!\n§6If you want to launch it please join it.";
         },
         maxPlayers: 0
-    });
+    }
+    if (serverData.onlinemode == null) {
+        serverData["online-mode"] = true;
+        serverData["encryption"] = true;
+    }
+    if (serverData.version) {
+        mcServerOptions = serverData.version;
+    }
+    const mcServer = mc.createServer(mcServerOptions);
 
     mcServer.on("login", (client) => {
         let isServerNeededToStart = true;

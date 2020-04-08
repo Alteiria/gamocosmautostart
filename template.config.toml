@@ -4,3 +4,4 @@ id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxx"
 key = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 port = 25565
 onlinemode = true
+# version = 47 # optional, use it only if you are having issue with displaying the MOTD, use protocol versions from https://wiki.vg/Protocol_version_numbers
