@@ -70,11 +70,15 @@ function launchSkeletonServer(serverData) {
         maxPlayers: 0
     }
     if (serverData.onlinemode == null) {
-        serverData["online-mode"] = true;
-        serverData["encryption"] = true;
+        mcServerOptions["online-mode"] = true;
+        mcServerOptions["encryption"] = true;
+    }
+    else {
+        mcServerOptions["online-mode"] = serverData.onlinemode;
+        mcServerOptions["encryption"] = serverData.onlinemode;
     }
     if (serverData.version) {
-        mcServerOptions = serverData.version;
+        mcServerOptions["version"] = serverData.version;
     }
     const mcServer = mc.createServer(mcServerOptions);
 
