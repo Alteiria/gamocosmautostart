@@ -26,12 +26,16 @@ function checkUntilServerIsUp(serverData, mcServer) {
                     case "up":
                         mcServer.close();
                         mcServer.on('close', () => {
-                            const proxyToNewDO = proxyTCP.createProxy(serverData.port, result.ip, 25565);
-                            checkUntilServerIsDown(serverData, proxyToNewDO);
+                            setTimeout(() => {
+                                const proxyToNewDO = proxyTCP.createProxy(serverData.port, result.ip, 25565);
+                                checkUntilServerIsDown(serverData, proxyToNewDO);
+                            }, 5000);
                             clearInterval(loopUntilServerIsUp);
                         });
+                        break;
                     case "paused":
                         resumeServer(serverData.id, serverData.key);
+                        break;
                 }
             });
     }, 5000);
@@ -45,7 +49,9 @@ function checkUntilServerIsDown(serverData, proxyToNewDO) {
                     if (proxyToNewDO)
                         proxyToNewDO.end();
                     clearInterval(loopUntilServerIsDown);
-                    launchSkeletonServer(serverData);
+                    setTimeout(() => {
+                        launchSkeletonServer(serverData);
+                    }, 5000);
                 }
             });
     }, 5000);
@@ -53,8 +59,8 @@ function checkUntilServerIsDown(serverData, proxyToNewDO) {
 
 function launchSkeletonServer(serverData) {
     const mcServer = mc.createServer({
-        "online-mode": serverData.onlinemode,
-        encryption: serverData.onlinemode,
+        "online-mode": (serverData.onlinemode || "true"),
+        encryption: (serverData.onlinemode || "true"),
         host: "0.0.0.0",
         port: serverData.port,
         beforePing: function (res, client) {
@@ -78,14 +84,16 @@ function launchSkeletonServer(serverData) {
                             startServer(serverData.id, serverData.key);
                             checkUntilServerIsUp(serverData, mcServer);
                         }
+                        break;
                     case "paused":
                         resumeServer(serverData.id, serverData.key);
-                        checkUntilServerIsUp(serverData, mcServer)
+                        checkUntilServerIsUp(serverData, mcServer);
+                        break;
                 }
             });
         const reasonKick = {
             text: "Hello §b" + client.username + "§r!\n§cThe Minecraft server "
-                + serverData.name + " is not ready yet!\n§rPlease come back in less than a minute."
+                + serverData.name + " is not ready yet!\n§rPlease come back in less than 3 minutes."
         };
         client.write("kick_disconnect", { reason: JSON.stringify(reasonKick) });
     });
