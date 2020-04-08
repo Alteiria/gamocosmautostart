@@ -58,12 +58,14 @@ function checkUntilServerIsDown(serverData, proxyToNewDO) {
 }
 
 function launchSkeletonServer(serverData) {
+    let onlineMode = true;
+    if (serverData.onlinemode)
+        onlineMode = JSON.parse(serverData.onlinemode.toLowerCase());
     const mcServer = mc.createServer({
-        "online-mode": serverData.onlinemode,
-        encryption: serverData.onlinemode,
+        "online-mode": onlineMode,
         host: "0.0.0.0",
         port: serverData.port,
-        beforePing: function (res, client) {
+        beforePing: (res, client) => {
             res.version.name = "The server is offline!";
             res.version.protocol = 0;
             res.description.text = "§cThe Minecraft server " + serverData.name
@@ -72,7 +74,7 @@ function launchSkeletonServer(serverData) {
         maxPlayers: 0
     });
 
-    mcServer.on("login", function (client) {
+    mcServer.on("login", (client) => {
         let isServerNeededToStart = true;
         getServerStatus(serverData)
             .then(result => {
