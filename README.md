@@ -12,8 +12,8 @@ Internally we use GamocosmAutoStart to manage some of our servers :smiley:.
 ## How to setup the program
 1. Copy the file `template.config.toml` to `config.toml`
 2. Register on Gamocosm: https://gamocosm.com/users/sign_up
-3. Create a new server. (use a simple name without spaces)
-4. In the file `config.toml` rename `example` in `[servers.example]` and `name = "example"` to the server name that you used when creating your server on Gamocosm.
+3. Create a new server.
+4. In the file `config.toml` rename `example` in `[servers.example]` to the server name that you used when creating your server on Gamocosm.
 5. Head over the "Advanced" tab of Gamocosm's interface.
 6. Copy the `API key` then paste it in the `config.toml` file for the `key` field under `[servers.yourServerName]`.
 7. In the address URL bar of the Gamocosm interface copy everything **after** `https://gamocosm.com/servers/` then paste it in the `config.toml` file for the `id` field under `[servers.yourServerName]`.

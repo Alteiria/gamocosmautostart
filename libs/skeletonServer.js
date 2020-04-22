@@ -57,14 +57,14 @@ function checkUntilServerIsDown(serverData, proxyToNewDO) {
     }, 5000);
 }
 
-function launchSkeletonServer(serverData) {
+function launchSkeletonServer(serverData, serverName) {
     let mcServerOptions = {
         host: "0.0.0.0",
         port: serverData.port,
         beforePing: (res, client) => {
             res.version.name = "The server is offline!";
             res.version.protocol = 0;
-            res.description.text = "§cThe Minecraft server " + serverData.name
+            res.description.text = "§cThe Minecraft server " + serverName
                 + " is offline!\n§6If you want to launch it please join it.";
         },
         maxPlayers: 0
@@ -90,7 +90,7 @@ function launchSkeletonServer(serverData) {
                     case "down":
                         if (isServerNeededToStart) {
                             isServerNeededToStart = false;
-                            console.log("starting the server " + serverData.name + " because someone joined it!");
+                            console.log("starting the server " + serverName + " because someone joined it!");
                             startServer(serverData.id, serverData.key);
                             checkUntilServerIsUp(serverData, mcServer);
                         }
@@ -103,13 +103,13 @@ function launchSkeletonServer(serverData) {
             });
         const reasonKick = {
             text: "Hello §b" + client.username + "§r!\n§cThe Minecraft server "
-                + serverData.name + " is not ready yet!\n§rPlease come back in less than 3 minutes."
+                + serverName + " is not ready yet!\n§rPlease come back in less than 3 minutes."
         };
         client.write("kick_disconnect", { reason: JSON.stringify(reasonKick) });
     });
 }
 
-export default function (serverData) {
+export default function (serverData, serverName) {
     getServerStatus(serverData)
         .then(result => {
             switch (result.status) {
@@ -121,11 +121,11 @@ export default function (serverData) {
                 case "preparing":
                 case "broken":
                 case "down":
-                    launchSkeletonServer(serverData);
+                    launchSkeletonServer(serverData, serverName);
                     break;
                 case "paused":
                     resumeServer(serverData.id, serverData.key);
-                    launchSkeletonServer(serverData);
+                    launchSkeletonServer(serverData, serverName);
                     break;
                 case "saving":
                     checkUntilServerIsDown(serverData);

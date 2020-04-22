@@ -20,7 +20,7 @@
   "dependencies": {
     "@iarna/toml": "^2.2.3",
     "got": "^10.7.0",
-    "minecraft-protocol": "^1.11.0",
+    "minecraft-protocol": "git+https://github.com/PrismarineJS/node-minecraft-protocol.git",
     "node-tcp-proxy": "0.0.15"
   },
   "type": "module"
